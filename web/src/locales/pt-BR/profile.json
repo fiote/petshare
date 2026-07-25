@@ -1,0 +1,10 @@
+{
+  "title": "Meu perfil",
+  "name": "Nome",
+  "email": "Email",
+  "error": "Erro ao atualizar perfil.",
+  "success": "Perfil atualizado com sucesso.",
+  "language": "Idioma",
+  "languageEnglish": "English",
+  "languagePortuguese": "Português (Brasil)"
+}

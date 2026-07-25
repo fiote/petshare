@@ -1,0 +1,16 @@
+{
+  "userNotFound": "User not found.",
+  "petNotFound": "Pet not found.",
+  "tutorNotFoundForPet": "Tutor not found for this pet.",
+  "forbiddenNoAccess": "You don't have access to this pet.",
+  "forbiddenOwnerOnly": "Only the pet's owner can delete it.",
+  "forbiddenInviteNotYours": "This invitation doesn't belong to your account.",
+  "conflictAlreadyTutor": "This email is already a tutor of this pet.",
+  "conflictAlreadyTutorEmail": "This email is already associated with a tutor of this pet.",
+  "conflictPendingInvite": "This email already has a pending invitation for this pet.",
+  "inviteInvalidOrUsed": "Invalid or already used invitation.",
+  "inviteExpired": "Invitation expired.",
+  "noFileUploaded": "No file uploaded.",
+  "unsupportedImageFormat": "Unsupported image format.",
+  "photoNotFound": "Photo not found."
+}

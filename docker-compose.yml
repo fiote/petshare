@@ -1,0 +1,14 @@
+services:
+  petshare:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - petshare_pgdata:/var/lib/postgresql/data
+      - petshare_uploads:/app/uploads
+
+volumes:
+  petshare_pgdata:
+  petshare_uploads:

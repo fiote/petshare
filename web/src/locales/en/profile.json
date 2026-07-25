@@ -1,0 +1,10 @@
+{
+  "title": "My profile",
+  "name": "Name",
+  "email": "Email",
+  "error": "Error updating profile.",
+  "success": "Profile updated successfully.",
+  "language": "Language",
+  "languageEnglish": "English",
+  "languagePortuguese": "Português (Brasil)"
+}

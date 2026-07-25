@@ -1,0 +1,12 @@
+{
+  "save": "Save",
+  "saving": "Saving...",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "logout": "Log out",
+  "myProfile": "My profile",
+  "back": "Back",
+  "loggedInAs": "Logged in as <1>{{name}}</1>",
+  "logoutConfirmTitle": "Log out?",
+  "logoutConfirmDescription": "You'll need to log in again to access your pets."
+}

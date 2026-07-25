@@ -1,0 +1,20 @@
+{
+  "confirmation": {
+    "subject": "Confirme seu email — PetShare",
+    "greeting": "Olá, {name}!",
+    "body": "Obrigado por se cadastrar no PetShare. Confirme seu email clicando no link abaixo:",
+    "ignoreNotice": "Se você não criou essa conta, ignore este email."
+  },
+  "invitation": {
+    "subject": "{inviterName} convidou você para cuidar de {petName} no PetShare",
+    "greeting": "Olá!",
+    "body": "<strong>{inviterName}</strong> convidou você para ser tutor(a) de <strong>{petName}</strong> e ajudar a gerenciar o calendário de guarda compartilhada.",
+    "cta": "Clique aqui para aceitar o convite"
+  },
+  "passwordReset": {
+    "subject": "Redefinir sua senha — PetShare",
+    "greeting": "Olá, {name}!",
+    "body": "Recebemos uma solicitação para redefinir sua senha do PetShare. Clique no link abaixo para escolher uma nova:",
+    "ignoreNotice": "Se você não solicitou isso, pode ignorar este email com segurança — sua senha permanecerá a mesma."
+  }
+}
