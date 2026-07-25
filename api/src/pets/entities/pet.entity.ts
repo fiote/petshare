@@ -27,7 +27,7 @@ export class Pet {
 
   @Expose()
   get photoUrl(): string | null {
-  	return this.photoFilename ? `/api/pets/photos/${this.photoFilename}` : null;
+  	return this.photoFilename ? `/api/pets/${this.id}/photo/${this.photoFilename}` : null;
   }
 
   @OneToMany(() => PetTutor, (petTutor) => petTutor.pet)
