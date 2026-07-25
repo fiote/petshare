@@ -3,9 +3,11 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, ApiError } from '../api/client';
 import { AuthShell } from '../components/AuthShell';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function ResetPasswordPage() {
   const { t } = useTranslation('auth');
+  const { t: tCommon } = useTranslation('common');
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
@@ -56,22 +58,24 @@ export function ResetPasswordPage() {
       <form className="form" onSubmit={handleSubmit}>
         <label className="field">
           <span>{t('resetPassword.newPassword')}</span>
-          <input
-            type="password"
+          <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
+            showLabel={tCommon('showPassword')}
+            hideLabel={tCommon('hidePassword')}
           />
         </label>
         <label className="field">
           <span>{t('resetPassword.confirmPassword')}</span>
-          <input
-            type="password"
+          <PasswordInput
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             minLength={8}
+            showLabel={tCommon('showPassword')}
+            hideLabel={tCommon('hidePassword')}
           />
         </label>
         {error && <p className="error">{error}</p>}

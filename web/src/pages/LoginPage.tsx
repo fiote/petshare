@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { AuthShell } from '../components/AuthShell';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function LoginPage() {
   const { t } = useTranslation('auth');
+  const { t: tCommon } = useTranslation('common');
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -42,11 +44,12 @@ export function LoginPage() {
         </label>
         <label className="field">
           <span>{t('login.password')}</span>
-          <input
-            type="password"
+          <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            showLabel={tCommon('showPassword')}
+            hideLabel={tCommon('hidePassword')}
           />
         </label>
         <p className="form__hint" style={{ textAlign: 'right', margin: 0 }}>

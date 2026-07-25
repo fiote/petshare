@@ -8,5 +8,7 @@
   "back": "Voltar",
   "loggedInAs": "Logado como <1>{{name}}</1>",
   "logoutConfirmTitle": "Sair da conta?",
-  "logoutConfirmDescription": "Você precisará entrar novamente para acessar seus pets."
+  "logoutConfirmDescription": "Você precisará entrar novamente para acessar seus pets.",
+  "showPassword": "Mostrar senha",
+  "hidePassword": "Ocultar senha"
 }

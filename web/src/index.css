@@ -272,6 +272,41 @@ input:focus {
   box-shadow: 0 0 0 3px var(--color-primary-soft);
 }
 
+.password-input {
+  position: relative;
+  display: flex;
+}
+
+.password-input input {
+  padding-right: 2.75rem;
+}
+
+.password-input__toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.password-input__toggle:hover,
+.password-input__toggle:focus-visible {
+  color: var(--color-text);
+}
+
+.password-input__toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .combobox {
   position: relative;
 }

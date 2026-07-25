@@ -3,15 +3,18 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, ApiError } from '../api/client';
 import { AuthShell } from '../components/AuthShell';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function RegisterPage() {
   const { t } = useTranslation('auth');
+  const { t: tCommon } = useTranslation('common');
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get('inviteToken') ?? undefined;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,6 +22,12 @@ export function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (password !== confirmPassword) {
+      setError(t('register.passwordMismatch'));
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post('/auth/register', { name, email, password, inviteToken });
@@ -59,12 +68,24 @@ export function RegisterPage() {
         </label>
         <label className="field">
           <span>{t('register.password')}</span>
-          <input
-            type="password"
+          <PasswordInput
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
+            showLabel={tCommon('showPassword')}
+            hideLabel={tCommon('hidePassword')}
+          />
+        </label>
+        <label className="field">
+          <span>{t('register.confirmPassword')}</span>
+          <PasswordInput
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={8}
+            showLabel={tCommon('showPassword')}
+            hideLabel={tCommon('hidePassword')}
           />
         </label>
         {error && <p className="error">{error}</p>}

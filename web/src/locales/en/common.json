@@ -8,5 +8,7 @@
   "back": "Back",
   "loggedInAs": "Logged in as <1>{{name}}</1>",
   "logoutConfirmTitle": "Log out?",
-  "logoutConfirmDescription": "You'll need to log in again to access your pets."
+  "logoutConfirmDescription": "You'll need to log in again to access your pets.",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password"
 }
