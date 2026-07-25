@@ -112,6 +112,8 @@ export class MailService {
 			this.logger.error(`Falha ao enviar email para ${msg.to}: ${error.message}`);
 			throw new Error(`Falha ao enviar email via Resend: ${error.message}`);
 		}
+
+		this.logger.log(`Email enviado para ${msg.to} | Assunto: ${msg.subject}`);
 	}
 }
 

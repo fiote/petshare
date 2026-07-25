@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
 import * as bcrypt from 'bcrypt';
@@ -16,6 +16,8 @@ const PASSWORD_RESET_TOKEN_TTL_HOURS = 2;
 
 @Injectable()
 export class AuthService {
+	private readonly logger = new Logger(AuthService.name);
+
 	constructor(
     private readonly usersService: UsersService,
     private readonly mailService: MailService,
@@ -29,6 +31,7 @@ export class AuthService {
 
 		const existing = await this.usersService.findByEmail(dto.email);
 		if (existing) {
+			this.logger.warn(`Tentativa de cadastro com email já existente: ${dto.email}`);
 			// Resposta idêntica ao caminho de sucesso para não permitir enumeração de emails cadastrados.
 			return genericMessage;
 		}
@@ -53,6 +56,8 @@ export class AuthService {
 		}
 
 		await this.mailService.sendEmailConfirmation(user.email, user.name, emailConfirmationToken, lang);
+
+		this.logger.log(`Usuário cadastrado: ${user.email} (id=${user.id})`);
 
 		return genericMessage;
 	}
@@ -82,6 +87,8 @@ export class AuthService {
 		user.emailConfirmationTokenExpiresAt = null;
 		await this.usersService.save(user);
 
+		this.logger.log(`Email confirmado: ${user.email} (id=${user.id})`);
+
 		return { message: this.i18n.t('auth.confirmSuccess', { lang }) };
 	}
 
@@ -109,15 +116,18 @@ export class AuthService {
 	async login(dto: LoginDto, lang: string) {
 		const user = await this.usersService.findByEmail(dto.email);
 		if (!user) {
+			this.logger.warn(`Login falhou (usuário inexistente): ${dto.email}`);
 			throw new UnauthorizedException(this.i18n.t('auth.invalidCredentials', { lang }));
 		}
 
 		const passwordMatches = await bcrypt.compare(dto.password, user.passwordHash);
 		if (!passwordMatches) {
+			this.logger.warn(`Login falhou (senha incorreta): ${dto.email}`);
 			throw new UnauthorizedException(this.i18n.t('auth.invalidCredentials', { lang }));
 		}
 
 		if (!user.emailConfirmed) {
+			this.logger.warn(`Login bloqueado (email não confirmado): ${dto.email}`);
 			throw new UnauthorizedException(this.i18n.t('auth.emailNotConfirmed', { lang }));
 		}
 
@@ -126,6 +136,8 @@ export class AuthService {
 			email: user.email
 		});
 		const { exp } = this.jwtService.decode<{ exp: number }>(accessToken);
+
+		this.logger.log(`Login bem-sucedido: ${user.email} (id=${user.id})`);
 
 		return {
 			accessToken,
@@ -170,6 +182,8 @@ export class AuthService {
 		user.passwordResetToken = null;
 		user.passwordResetTokenExpiresAt = null;
 		await this.usersService.save(user);
+
+		this.logger.log(`Senha redefinida: ${user.email} (id=${user.id})`);
 
 		return { message: this.i18n.t('auth.passwordResetSuccess', { lang }) };
 	}

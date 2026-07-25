@@ -18,6 +18,7 @@ import { PetTutor } from './pets/entities/pet-tutor.entity';
 import { CalendarEntry } from './calendar/entities/calendar-entry.entity';
 import { requireEnv } from './config/require-env';
 import { CsrfMiddleware } from './common/csrf.middleware';
+import { HttpLoggerMiddleware } from './common/http-logger.middleware';
 
 @Module({
 	imports: [
@@ -66,6 +67,6 @@ import { CsrfMiddleware } from './common/csrf.middleware';
 })
 export class AppModule implements NestModule {
 	configure(consumer: MiddlewareConsumer) {
-		consumer.apply(CsrfMiddleware).forRoutes('*');
+		consumer.apply(HttpLoggerMiddleware, CsrfMiddleware).forRoutes('*');
 	}
 }
