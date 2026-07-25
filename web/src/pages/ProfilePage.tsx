@@ -33,13 +33,13 @@ export function ProfilePage() {
     <Layout title={t('title')} backTo="/">
       <section className="card">
         <form className="form" onSubmit={handleSubmit}>
+          <div className="field">
+            <span>{t('email')}</span>
+            <p className="field__static">{user?.email}</p>
+          </div>
           <label className="field">
             <span>{t('name')}</span>
             <input value={name} onChange={(e) => setName(e.target.value)} required minLength={2} />
-          </label>
-          <label className="field">
-            <span>{t('email')}</span>
-            <input value={user?.email ?? ''} disabled />
           </label>
           <label className="field">
             <span>{t('language')}</span>
