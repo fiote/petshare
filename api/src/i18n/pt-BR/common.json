@@ -1,4 +1,5 @@
 {
   "defaultTutorLabel": "Tutor",
-  "unknownTutorName": "Um tutor"
+  "unknownTutorName": "Um tutor",
+  "emailCooldown": "Aguarde {seconds} segundos antes de solicitar um novo email."
 }

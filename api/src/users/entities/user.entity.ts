@@ -33,12 +33,20 @@ export class User {
   	emailConfirmationTokenExpiresAt: Date | null;
 
   @Exclude()
+  @Column({ type: 'timestamptz', nullable: true })
+  	confirmationEmailSentAt: Date | null;
+
+  @Exclude()
   @Column({ type: 'varchar', nullable: true })
   	passwordResetToken: string | null;
 
   @Exclude()
   @Column({ type: 'timestamptz', nullable: true })
   	passwordResetTokenExpiresAt: Date | null;
+
+  @Exclude()
+  @Column({ type: 'timestamptz', nullable: true })
+  	passwordResetEmailSentAt: Date | null;
 
   @OneToMany(() => PetTutor, (petTutor) => petTutor.user)
   	petTutors: PetTutor[];

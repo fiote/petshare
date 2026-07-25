@@ -10,6 +10,7 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PetsService } from '../pets/pets.service';
+import { assertEmailCooldownElapsed } from '../common/email-cooldown';
 
 const CONFIRMATION_TOKEN_TTL_HOURS = 48;
 const PASSWORD_RESET_TOKEN_TTL_HOURS = 2;
@@ -48,7 +49,8 @@ export class AuthService {
 			passwordHash,
 			emailConfirmed: false,
 			emailConfirmationToken,
-			emailConfirmationTokenExpiresAt
+			emailConfirmationTokenExpiresAt,
+			confirmationEmailSentAt: new Date()
 		});
 
 		if (dto.inviteToken) {
@@ -98,10 +100,13 @@ export class AuthService {
 			return { message: this.i18n.t('auth.resendGeneric', { lang }) };
 		}
 
+		assertEmailCooldownElapsed(user.confirmationEmailSentAt, lang, this.i18n);
+
 		user.emailConfirmationToken = randomUUID();
 		user.emailConfirmationTokenExpiresAt = new Date(
 			Date.now() + CONFIRMATION_TOKEN_TTL_HOURS * 60 * 60 * 1000
 		);
+		user.confirmationEmailSentAt = new Date();
 		await this.usersService.save(user);
 		await this.mailService.sendEmailConfirmation(
 			user.email,
@@ -155,10 +160,13 @@ export class AuthService {
 			return genericMessage;
 		}
 
+		assertEmailCooldownElapsed(user.passwordResetEmailSentAt, lang, this.i18n);
+
 		user.passwordResetToken = randomUUID();
 		user.passwordResetTokenExpiresAt = new Date(
 			Date.now() + PASSWORD_RESET_TOKEN_TTL_HOURS * 60 * 60 * 1000
 		);
+		user.passwordResetEmailSentAt = new Date();
 		await this.usersService.save(user);
 
 		await this.mailService.sendPasswordReset(user.email, user.name, user.passwordResetToken, lang);

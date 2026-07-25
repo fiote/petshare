@@ -14,6 +14,7 @@ import { CreatePetDto } from './dto/create-pet.dto';
 import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
 import { PetPhotoStorageService } from './pet-photo-storage.service';
+import { assertEmailCooldownElapsed } from '../common/email-cooldown';
 
 const INVITATION_TOKEN_TTL_DAYS = 14;
 
@@ -195,6 +196,12 @@ export class PetsService {
 			throw new ConflictException(this.i18n.t('pets.conflictPendingInvite', { lang }));
 		}
 
+		const lastInviteToEmail = await this.petTutorsRepository.findOne({
+			where: { invitedEmail: normalizedEmail },
+			order: { invitationEmailSentAt: 'DESC' }
+		});
+		assertEmailCooldownElapsed(lastInviteToEmail?.invitationEmailSentAt ?? null, lang, this.i18n);
+
 		const invitedUser = await this.usersService.findByEmail(normalizedEmail);
 		const invitationToken = randomUUID();
 
@@ -208,7 +215,8 @@ export class PetsService {
 				invitationToken,
 				invitationTokenExpiresAt: new Date(
 					Date.now() + INVITATION_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000
-				)
+				),
+				invitationEmailSentAt: new Date()
 			})
 		);
 

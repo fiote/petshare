@@ -60,6 +60,10 @@ export class PetTutor {
   @Column({ type: 'timestamptz', nullable: true })
   	invitationTokenExpiresAt: Date | null;
 
+  @Exclude()
+  @Column({ type: 'timestamptz', nullable: true })
+  	invitationEmailSentAt: Date | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   	createdAt: Date;
 
