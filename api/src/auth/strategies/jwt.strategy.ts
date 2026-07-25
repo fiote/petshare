@@ -1,8 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Strategy } from 'passport-jwt';
+import type { Request } from 'express';
 import { UsersService } from '../../users/users.service';
+import { AUTH_COOKIE_NAME } from '../auth-cookie';
+
+function extractFromCookie(req: Request): string | null {
+	return req.cookies?.[AUTH_COOKIE_NAME] ?? null;
+}
 
 export interface JwtPayload {
   sub: string;
@@ -20,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 			throw new Error('JWT_SECRET não configurado. Defina uma variável de ambiente forte e aleatória.');
 		}
 		super({
-			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+			jwtFromRequest: extractFromCookie,
 			ignoreExpiration: false,
 			secretOrKey: secret
 		});

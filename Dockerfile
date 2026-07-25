@@ -51,11 +51,6 @@ RUN chmod +x /app/docker/entrypoint.sh /app/docker/wait-for-postgres.sh /app/doc
     && chown -R node:node /app/api /app/uploads
 
 ENV PORT=5003 \
-    DB_HOST=127.0.0.1 \
-    DB_PORT=5432 \
-    DB_USERNAME=petshare \
-    DB_PASSWORD=petshare \
-    DB_NAME=petshare \
     NODE_ENV=production \
     PET_PHOTOS_DIR=/app/uploads/pet-photos
 

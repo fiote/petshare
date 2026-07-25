@@ -1,60 +1,72 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import { api, clearToken, getToken, setToken, SESSION_EXPIRED_EVENT } from '../api/client';
+import { api, ApiError, SESSION_EXPIRED_EVENT } from '../api/client';
 import type { AuthUser } from '../api/types';
 
 interface LoginResponse {
-  accessToken: string;
   user: AuthUser;
 }
 
 interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (user: AuthUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const USER_KEY = 'petshare_user';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    const stored = localStorage.getItem(USER_KEY);
-    return stored ? (JSON.parse(stored) as AuthUser) : null;
-  });
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get<AuthUser>('/users/me')
+      .then((me) => {
+        if (!cancelled) setUser(me);
+      })
+      .catch((err) => {
+        if (!cancelled && !(err instanceof ApiError && err.status === 401)) {
+          // erro inesperado (rede, 5xx): mantém usuário deslogado, sem propagar
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await api.post<LoginResponse>('/auth/login', { email, password });
-    setToken(response.accessToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(response.user));
     setUser(response.user);
   }, []);
 
-  const logout = useCallback(() => {
-    clearToken();
-    localStorage.removeItem(USER_KEY);
-    setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/auth/logout');
+    } finally {
+      setUser(null);
+    }
   }, []);
 
   const updateUser = useCallback((updated: AuthUser) => {
-    localStorage.setItem(USER_KEY, JSON.stringify(updated));
     setUser(updated);
   }, []);
 
   useEffect(() => {
-    const handleSessionExpired = () => {
-      localStorage.removeItem(USER_KEY);
-      setUser(null);
-    };
+    const handleSessionExpired = () => setUser(null);
     window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: Boolean(getToken()), login, logout, updateUser }}
+      value={{ user, isAuthenticated: Boolean(user), isLoading, login, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

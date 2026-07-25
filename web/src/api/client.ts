@@ -2,18 +2,21 @@ import i18n from '../locales/i18n';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
-const TOKEN_KEY = 'petshare_token';
+const CSRF_COOKIE_NAME = 'petshare_csrf';
+const CSRF_HEADER_NAME = 'X-CSRF-Token';
 
-export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+function readCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
 }
 
-export function setToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
+async function ensureCsrfCookie(): Promise<string> {
+  const existing = readCookie(CSRF_COOKIE_NAME);
+  if (existing) {
+    return existing;
+  }
+  await fetch(`${API_BASE_URL}/auth/csrf`, { credentials: 'include' });
+  return readCookie(CSRF_COOKIE_NAME) ?? '';
 }
 
 export class ApiError extends Error {
@@ -27,19 +30,27 @@ export class ApiError extends Error {
 
 export const SESSION_EXPIRED_EVENT = 'petshare:session-expired';
 
+const SAFE_METHODS = new Set(['GET', 'HEAD']);
+
 async function request<T>(
   path: string,
   options: { method?: string; body?: unknown; formData?: FormData } = {},
 ): Promise<T> {
-  const token = getToken();
+  const method = options.method ?? 'GET';
   const isFormData = Boolean(options.formData);
+  const headers: Record<string, string> = {
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    'Accept-Language': i18n.language,
+  };
+
+  if (!SAFE_METHODS.has(method)) {
+    headers[CSRF_HEADER_NAME] = await ensureCsrfCookie();
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: options.method ?? 'GET',
-    headers: {
-      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      'Accept-Language': i18n.language,
-    },
+    method,
+    credentials: 'include',
+    headers,
     body: isFormData ? options.formData : options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 
@@ -51,8 +62,7 @@ async function request<T>(
     } catch {
       // resposta sem corpo JSON
     }
-    if (response.status === 401 && token) {
-      clearToken();
+    if (response.status === 401) {
       window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
     }
     throw new ApiError(message, response.status);

@@ -1,6 +1,6 @@
 import { join } from 'path';
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -16,6 +16,8 @@ import { User } from './users/entities/user.entity';
 import { Pet } from './pets/entities/pet.entity';
 import { PetTutor } from './pets/entities/pet-tutor.entity';
 import { CalendarEntry } from './calendar/entities/calendar-entry.entity';
+import { requireEnv } from './config/require-env';
+import { CsrfMiddleware } from './common/csrf.middleware';
 
 @Module({
 	imports: [
@@ -35,17 +37,15 @@ import { CalendarEntry } from './calendar/entities/calendar-entry.entity';
 			resolvers: [AcceptLanguageResolver]
 		}),
 		TypeOrmModule.forRootAsync({
-			imports: [ConfigModule],
-			inject: [ConfigService],
-			useFactory: (config: ConfigService) => ({
+			useFactory: () => ({
 				type: 'postgres',
-				host: config.get<string>('DB_HOST') ?? 'localhost',
-				port: config.get<number>('DB_PORT') ?? 5432,
-				username: config.get<string>('DB_USERNAME') ?? 'petshare',
-				password: config.get<string>('DB_PASSWORD') ?? 'petshare',
-				database: config.get<string>('DB_NAME') ?? 'petshare',
+				host: requireEnv('DB_HOST'),
+				port: Number(requireEnv('DB_PORT')),
+				username: requireEnv('DB_USERNAME'),
+				password: requireEnv('DB_PASSWORD'),
+				database: requireEnv('DB_NAME'),
 				entities: [User, Pet, PetTutor, CalendarEntry],
-				synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
+				synchronize: process.env.DB_SYNCHRONIZE === 'true',
 				autoLoadEntities: true
 			})
 		}),
@@ -64,4 +64,8 @@ import { CalendarEntry } from './calendar/entities/calendar-entry.entity';
 		}
 	]
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer.apply(CsrfMiddleware).forRoutes('*');
+	}
+}

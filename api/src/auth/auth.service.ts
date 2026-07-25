@@ -125,9 +125,11 @@ export class AuthService {
 			sub: user.id,
 			email: user.email
 		});
+		const { exp } = this.jwtService.decode<{ exp: number }>(accessToken);
 
 		return {
 			accessToken,
+			accessTokenExpiresAt: new Date(exp * 1000),
 			user: { id: user.id, name: user.name, email: user.email }
 		};
 	}

@@ -6,7 +6,10 @@
 # nova imagem: docker exec -it <container> /app/docker/mark-initial-migration-applied.sh
 set -e
 
-PSQL="psql -h 127.0.0.1 -U ${DB_USERNAME:-petshare} -d ${DB_NAME:-petshare}"
+: "${DB_USERNAME:?DB_USERNAME não configurado}"
+: "${DB_NAME:?DB_NAME não configurado}"
+
+PSQL="psql -h 127.0.0.1 -U ${DB_USERNAME} -d ${DB_NAME}"
 
 $PSQL -v ON_ERROR_STOP=1 <<-EOSQL
   CREATE TABLE IF NOT EXISTS migrations (

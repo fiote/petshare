@@ -1,6 +1,7 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { I18nLang } from 'nestjs-i18n';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -8,6 +9,8 @@ import { ConfirmEmailDto } from './dto/confirm-email.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { IsEmail } from 'class-validator';
+import { clearAuthCookie, setAuthCookie } from './auth-cookie';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 class ResendConfirmationDto {
   @IsEmail()
@@ -20,6 +23,12 @@ const AUTH_THROTTLE = { default: { ttl: 60_000, limit: 5 } };
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
+  @Get('csrf')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  csrf() {
+  	// CsrfMiddleware já seta o cookie CSRF na resposta antes de chegar aqui.
+  }
+
   @Post('register')
   @Throttle(AUTH_THROTTLE)
 	register(@Body() dto: RegisterDto, @I18nLang() lang: string) {
@@ -29,8 +38,22 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle(AUTH_THROTTLE)
-  login(@Body() dto: LoginDto, @I18nLang() lang: string) {
-  	return this.authService.login(dto, lang);
+  async login(
+  	@Body() dto: LoginDto,
+  	@I18nLang() lang: string,
+  	@Res({ passthrough: true }) res: Response
+  ) {
+  	const { accessToken, accessTokenExpiresAt, user } = await this.authService.login(dto, lang);
+  	setAuthCookie(res, accessToken, accessTokenExpiresAt);
+  	return { user };
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  logout(@Res({ passthrough: true }) res: Response) {
+  	clearAuthCookie(res);
+  	return { message: 'ok' };
   }
 
   @Post('confirm-email')

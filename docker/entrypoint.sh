@@ -1,6 +1,14 @@
 #!/bin/sh
 set -e
 
+for var in DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_NAME; do
+  eval "value=\$$var"
+  if [ -z "$value" ]; then
+    echo "Erro: variável de ambiente $var não configurada. Defina-a no .env antes de iniciar." >&2
+    exit 1
+  fi
+done
+
 PGDATA=/var/lib/postgresql/data
 export PGDATA
 
@@ -17,8 +25,8 @@ EOF
   su postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -o '-c config_file=$PGDATA/postgresql.conf' -w start"
 
   su postgres -c "psql -v ON_ERROR_STOP=1 --username postgres" <<-EOSQL
-    CREATE USER ${DB_USERNAME:-petshare} WITH PASSWORD '${DB_PASSWORD:-petshare}';
-    CREATE DATABASE ${DB_NAME:-petshare} OWNER ${DB_USERNAME:-petshare};
+    CREATE USER ${DB_USERNAME} WITH PASSWORD '${DB_PASSWORD}';
+    CREATE DATABASE ${DB_NAME} OWNER ${DB_USERNAME};
 EOSQL
 
   su postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -w stop"

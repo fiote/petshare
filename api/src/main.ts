@@ -1,6 +1,8 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -13,8 +15,12 @@ async function bootstrap() {
 
 	app.set('trust proxy', 1);
 
+	app.use(helmet());
+	app.use(cookieParser());
+
 	app.enableCors({
-		origin: webBaseUrl
+		origin: webBaseUrl,
+		credentials: true
 	});
 
 	app.useGlobalPipes(
