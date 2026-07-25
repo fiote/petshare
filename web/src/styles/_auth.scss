@@ -1,0 +1,110 @@
+.auth-screen {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 1.5rem 3rem;
+  gap: 2.25rem;
+  background: var(--color-bg);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -100px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: var(--color-primary-soft);
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -140px;
+    left: -110px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: var(--color-primary-soft);
+    z-index: 0;
+  }
+}
+
+.auth-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.9rem;
+
+  &__icon {
+    width: 84px;
+    height: 84px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #ffb15c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+    box-shadow: 0 16px 32px -10px rgba(157, 96, 20, 0.4);
+  }
+
+  &__name {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-text);
+  }
+
+  &__tagline {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--color-muted);
+    max-width: 300px;
+    line-height: 1.4;
+  }
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  background: var(--color-surface);
+  border-radius: 28px;
+  padding: 1.85rem 1.6rem;
+  box-shadow: var(--shadow-soft);
+
+  &__title {
+    margin: 0 0 1.35rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+
+  .field input {
+    padding: 0.85rem 1.1rem;
+  }
+
+  .btn--primary {
+    margin-top: 0.35rem;
+    padding: 0.95rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .form__hint {
+    margin: 0;
+
+    & + .form__hint {
+      margin-top: -0.4rem;
+    }
+  }
+}
