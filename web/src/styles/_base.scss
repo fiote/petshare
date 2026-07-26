@@ -22,6 +22,16 @@ body {
   background: var(--color-bg);
 }
 
+@supports (min-height: 100dvh) {
+  #root {
+    min-height: 100dvh;
+  }
+
+  .screen {
+    min-height: 100dvh;
+  }
+}
+
 .error {
   color: var(--color-error);
   font-size: 0.88rem;

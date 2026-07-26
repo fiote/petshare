@@ -36,6 +36,12 @@
   }
 }
 
+@supports (min-height: 100dvh) {
+  .auth-screen {
+    min-height: 100dvh;
+  }
+}
+
 .auth-brand {
   position: relative;
   z-index: 1;
