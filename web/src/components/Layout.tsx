@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, LogOut, User } from 'lucide-react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { ConfirmDialog } from './ConfirmDialog';
 import { SyncStatusBanner } from './SyncStatusBanner';
@@ -14,7 +14,7 @@ interface LayoutProps {
 
 export function Layout({ children, title, backTo }: LayoutProps) {
   const { t } = useTranslation('common');
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const [confirmingLogout, setConfirmingLogout] = useState(false);
 
   return (
@@ -47,13 +47,6 @@ export function Layout({ children, title, backTo }: LayoutProps) {
       </header>
       <SyncStatusBanner />
       <main className="app-content">{children}</main>
-      {isAuthenticated && user && (
-        <p className="app-footer">
-          <Trans i18nKey="common:loggedInAs" values={{ name: user.name }}>
-            Logged in as <Link to="/profile">{user.name}</Link>
-          </Trans>
-        </p>
-      )}
 
       <ConfirmDialog
         open={confirmingLogout}
