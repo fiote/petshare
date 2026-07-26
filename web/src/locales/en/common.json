@@ -10,5 +10,14 @@
   "logoutConfirmTitle": "Log out?",
   "logoutConfirmDescription": "You'll need to log in again to access your pets.",
   "showPassword": "Show password",
-  "hidePassword": "Hide password"
+  "hidePassword": "Hide password",
+  "sync": {
+    "offline": "No connection — showing saved data",
+    "offlinePending_one": "No connection — {{count}} change waiting to sync",
+    "offlinePending_other": "No connection — {{count}} changes waiting to sync",
+    "syncing_one": "Syncing {{count}} pending change...",
+    "syncing_other": "Syncing {{count}} pending changes...",
+    "sessionExpired": "Your session expired before some offline changes could sync, so they were discarded. Please log in and try again.",
+    "dismiss": "Dismiss"
+  }
 }

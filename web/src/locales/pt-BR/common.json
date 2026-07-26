@@ -10,5 +10,14 @@
   "logoutConfirmTitle": "Sair da conta?",
   "logoutConfirmDescription": "Você precisará entrar novamente para acessar seus pets.",
   "showPassword": "Mostrar senha",
-  "hidePassword": "Ocultar senha"
+  "hidePassword": "Ocultar senha",
+  "sync": {
+    "offline": "Sem conexão — mostrando dados salvos",
+    "offlinePending_one": "Sem conexão — {{count}} alteração aguardando sincronização",
+    "offlinePending_other": "Sem conexão — {{count}} alterações aguardando sincronização",
+    "syncing_one": "Sincronizando {{count}} alteração pendente...",
+    "syncing_other": "Sincronizando {{count}} alterações pendentes...",
+    "sessionExpired": "Sua sessão expirou antes que algumas alterações offline pudessem ser sincronizadas, então foram descartadas. Entre novamente e tente de novo.",
+    "dismiss": "Dispensar"
+  }
 }

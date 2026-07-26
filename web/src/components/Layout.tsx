@@ -4,6 +4,7 @@ import { ArrowLeft, LogOut, User } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { ConfirmDialog } from './ConfirmDialog';
+import { SyncStatusBanner } from './SyncStatusBanner';
 
 interface LayoutProps {
   children: ReactNode;
@@ -44,6 +45,7 @@ export function Layout({ children, title, backTo }: LayoutProps) {
           </span>
         )}
       </header>
+      <SyncStatusBanner />
       <main className="app-content">{children}</main>
       {isAuthenticated && user && (
         <p className="app-footer">

@@ -10,10 +10,12 @@
     "loadError": "Error loading data.",
     "acceptError": "Error accepting invitation.",
     "unnamedPet": "Pet",
-    "close": "Close"
+    "close": "Close",
+    "cachedDataNotice": "Showing saved data (updated {{time}})"
   },
   "detail": {
     "loadError": "Error loading pet data.",
+    "cachedDataNotice": "Showing saved data (updated {{time}})",
     "dayUpdateError": "Error updating day.",
     "photoUploadError": "Error uploading photo.",
     "inviteError": "Error inviting tutor.",

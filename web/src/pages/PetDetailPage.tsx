@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Camera, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, ApiError } from '../api/client';
+import { fetchWithCache, formatRelativeTime } from '../api/offline-cache';
+import { enqueue, SYNC_QUEUE_CHANGED_EVENT } from '../api/sync-queue';
 import { formatDateOnly, todayDateOnly } from '../api/dates';
 import { tutorColor } from '../api/tutor-colors';
 import type { CalendarEntry, Pet, PetTutor, StatsWindow } from '../api/types';
@@ -28,6 +30,7 @@ export function PetDetailPage() {
   const [monthOffset, setMonthOffset] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [activeTutorId, setActiveTutorId] = useState<string | null>(null);
+  const [cachedAt, setCachedAt] = useState<string | null>(null);
 
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -63,14 +66,16 @@ export function PetDetailPage() {
   const loadAll = useCallback(async () => {
     if (!petId) return;
     try {
-      const [tutorsData, entriesData, statsData] = await Promise.all([
-        api.get<PetTutor[]>(`/pets/${petId}/tutors`),
-        api.get<CalendarEntry[]>(`/pets/${petId}/calendar?from=${rangeFrom}&to=${rangeTo}`),
-        api.get<StatsWindow[]>(`/pets/${petId}/calendar/stats?today=${todayDateOnly()}`),
+      const [tutorsResult, entriesResult, statsResult] = await Promise.all([
+        fetchWithCache<PetTutor[]>(`/pets/${petId}/tutors`),
+        fetchWithCache<CalendarEntry[]>(`/pets/${petId}/calendar?from=${rangeFrom}&to=${rangeTo}`),
+        fetchWithCache<StatsWindow[]>(`/pets/${petId}/calendar/stats?today=${todayDateOnly()}`),
       ]);
+      const tutorsData = tutorsResult.data;
       setTutors(tutorsData);
-      setEntries(entriesData);
-      setStats(statsData);
+      setEntries(entriesResult.data);
+      setStats(statsResult.data);
+      setCachedAt(tutorsResult.fromCache ? tutorsResult.fetchedAt : null);
       setActiveTutorId((current) => {
         if (current && tutorsData.some((t) => t.id === current)) return current;
         const mine = tutorsData.find((t) => t.userId === user?.id);
@@ -84,8 +89,8 @@ export function PetDetailPage() {
   const loadPet = useCallback(async () => {
     if (!petId) return;
     try {
-      const pets = await api.get<Pet[]>('/pets');
-      setPet(pets.find((p) => p.id === petId) ?? null);
+      const petsResult = await fetchWithCache<Pet[]>('/pets');
+      setPet(petsResult.data.find((p) => p.id === petId) ?? null);
     } catch {
       // ignora falha isolada de recarregar o pet; loadAll cobre o erro geral
     }
@@ -99,17 +104,68 @@ export function PetDetailPage() {
     loadAll();
   }, [loadAll]);
 
+  useEffect(() => {
+    const handleQueueChanged = () => {
+      if (navigator.onLine) {
+        loadAll();
+      }
+    };
+    window.addEventListener(SYNC_QUEUE_CHANGED_EVENT, handleQueueChanged);
+    return () => window.removeEventListener(SYNC_QUEUE_CHANGED_EVENT, handleQueueChanged);
+  }, [loadAll]);
+
+  const queueDayToggleOffline = async (
+    date: string,
+    isRemoving: boolean,
+    tutorId: string,
+  ) => {
+    if (isRemoving) {
+      await enqueue({ method: 'DELETE', path: `/pets/${petId}/calendar/days/${date}` });
+      setEntries((current) => current.filter((e) => e.date !== date));
+    } else {
+      await enqueue({
+        method: 'POST',
+        path: `/pets/${petId}/calendar/days`,
+        body: { date, petTutorId: tutorId },
+      });
+      const activeTutor = tutors.find((tut) => tut.id === tutorId) ?? null;
+      setEntries((current) => [
+        ...current.filter((e) => e.date !== date),
+        {
+          id: `optimistic-${date}`,
+          petId: petId as string,
+          petTutorId: tutorId,
+          date,
+          petTutor: activeTutor ?? undefined,
+        },
+      ]);
+    }
+  };
+
   const handleToggleDay = async (date: string, currentTutorId: string | null) => {
     if (!petId || !activeTutorId) return;
     setError(null);
+
+    const isRemoving = currentTutorId === activeTutorId;
+
+    if (!navigator.onLine) {
+      await queueDayToggleOffline(date, isRemoving, activeTutorId);
+      return;
+    }
+
     try {
-      if (currentTutorId === activeTutorId) {
+      if (isRemoving) {
         await api.delete(`/pets/${petId}/calendar/days/${date}`);
       } else {
         await api.post(`/pets/${petId}/calendar/days`, { date, petTutorId: activeTutorId });
       }
       await loadAll();
     } catch (err) {
+      if (err instanceof TypeError) {
+        // Falha de rede detectada só na tentativa (ex: navigator.onLine desatualizado): enfileira do mesmo jeito.
+        await queueDayToggleOffline(date, isRemoving, activeTutorId);
+        return;
+      }
       setError(err instanceof ApiError ? err.message : t('detail.dayUpdateError'));
     }
   };
@@ -202,6 +258,11 @@ export function PetDetailPage() {
       </section>
 
       {error && <p className="error">{error}</p>}
+      {cachedAt && (
+        <p className="form__hint">
+          {t('detail.cachedDataNotice', { time: formatRelativeTime(cachedAt) })}
+        </p>
+      )}
 
       <section className="card">
         <div className="section-header">

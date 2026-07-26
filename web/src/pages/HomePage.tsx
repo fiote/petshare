@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, ApiError } from '../api/client';
+import { fetchWithCache, formatRelativeTime } from '../api/offline-cache';
 import type { Pet, PetTutor } from '../api/types';
 import { Layout } from '../components/Layout';
 import { speciesEmoji, speciesLabel } from '../api/species';
@@ -15,16 +16,18 @@ export function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [cachedAt, setCachedAt] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [petsData, invitesData] = await Promise.all([
-        api.get<Pet[]>('/pets'),
-        api.get<PetTutor[]>('/invitations/pending'),
+      const [petsResult, invitesResult] = await Promise.all([
+        fetchWithCache<Pet[]>('/pets'),
+        fetchWithCache<PetTutor[]>('/invitations/pending'),
       ]);
-      setPets(petsData);
-      setPendingInvites(invitesData);
+      setPets(petsResult.data);
+      setPendingInvites(invitesResult.data);
+      setCachedAt(petsResult.fromCache ? petsResult.fetchedAt : null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('home.loadError'));
     } finally {
@@ -80,6 +83,11 @@ export function HomePage() {
       )}
 
       {error && <p className="error">{error}</p>}
+      {cachedAt && (
+        <p className="form__hint">
+          {t('home.cachedDataNotice', { time: formatRelativeTime(cachedAt) })}
+        </p>
+      )}
 
       {!loading && !hasPets && (
         <section className="card">

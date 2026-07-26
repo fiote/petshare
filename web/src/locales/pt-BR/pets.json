@@ -10,10 +10,12 @@
     "loadError": "Erro ao carregar dados.",
     "acceptError": "Erro ao aceitar convite.",
     "unnamedPet": "Pet",
-    "close": "Fechar"
+    "close": "Fechar",
+    "cachedDataNotice": "Mostrando dados salvos (atualizados {{time}})"
   },
   "detail": {
     "loadError": "Erro ao carregar dados do pet.",
+    "cachedDataNotice": "Mostrando dados salvos (atualizados {{time}})",
     "dayUpdateError": "Erro ao atualizar dia.",
     "photoUploadError": "Erro ao enviar foto.",
     "inviteError": "Erro ao convidar tutor.",
